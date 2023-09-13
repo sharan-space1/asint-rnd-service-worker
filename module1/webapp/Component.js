@@ -39,20 +39,20 @@ sap.ui.define([
                     var sBaseURI = this.getManifestObject()._oBaseUri._parts.path;
                     var sComponentName = this.getManifestObject().getComponentName().replaceAll(".", "");
                     var sServiceWorkerFilePath = "/sw.js";
-
-                    sBaseURI = sBaseURI.substring(0, sBaseURI.indexOf(sComponentName) + sComponentName.length);
+                    var sScope = "/";
 
                     if (((sBaseURI.length) - sComponentName.length) > 1) {
                         // Managed Approuter
-                        sServiceWorkerFilePath = sBaseURI + "/sw.js";
+                        sServiceWorkerFilePath = sBaseURI + "sw.js";
+                        sScope = sBaseURI;
                     }
                     
 
                     // Registering Service Worker
                     navigator.serviceWorker.register(sServiceWorkerFilePath, {
-                        scope: "/",
+                        scope: sScope,
                     }).then(function (oRegistration) {
-                        this.asintServiceWorker = oRegistration.installing || oRegistration.waiting || oRegistration.active;
+                        window.com.asint.rnd.sw.module1.serviceWorker = oRegistration.installing || oRegistration.waiting || oRegistration.active;
                         console.log("Service Worker has registered");
                     }).catch(function(oError) {
                         console.log("Service Worker registration failed: ", oError);
