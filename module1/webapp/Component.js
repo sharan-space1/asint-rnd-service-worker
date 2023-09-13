@@ -2,37 +2,6 @@
  * eslint-disable @sap/ui5-jsdocs/no-jsdoc
  */
 
-/**
- * Service Worker registration & life cycle management
- */
-if ("serviceWorker" in navigator) {
-
-    // Registering Service Worker
-    navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-    }).then(function (oRegistration) {
-        this.asintServiceWorker = oRegistration.installing || oRegistration.waiting || oRegistration.active;
-        console.log("Service Worker has registered");
-    }).catch(function(oError) {
-        console.log("Service Worker registration failed: ", oError);
-    });
-
-    // Checking for Service Worker registration
-    if (navigator.serviceWorker.controller) {
-        console.log("Has Service Worker registered");
-    }
-
-    // Attaching event listener for Service Worker controller change
-    addEventListener("controllerchange", function (oEvent) {
-        console.log("New version of Service Worker installed and activated");
-    });
-
-} else {
-
-    console.log("Sorry, Service workers are not supported. Please try different browsers");
-
-}
-
 sap.ui.define([
         "sap/ui/core/UIComponent",
         "sap/ui/Device",
@@ -60,6 +29,50 @@ sap.ui.define([
 
                 // set the device model
                 this.setModel(models.createDeviceModel(), "device");
+
+                /**
+                 * Service Worker registration & life cycle management
+                 */
+                if ("serviceWorker" in navigator) {
+
+                    // Managed Approuter is adding {destination ID}-{module name}-{version} in the URL, So getting that in runtime
+                    var sBaseURI = this.getManifestObject()._oBaseUri._parts.path;
+                    var sComponentName = this.getManifestObject().getComponentName().replaceAll(".", "");
+                    var sServiceWorkerFilePath = "/sw.js";
+
+                    sBaseURI = sBaseURI.substring(0, sBaseURI.indexOf(sComponentName) + sComponentName.length);
+
+                    if (((sBaseURI.length) - sComponentName.length) > 1) {
+                        // Managed Approuter
+                        sServiceWorkerFilePath = sBaseURI + "/sw.js";
+                    }
+                    
+
+                    // Registering Service Worker
+                    navigator.serviceWorker.register(sServiceWorkerFilePath, {
+                        scope: "/",
+                    }).then(function (oRegistration) {
+                        this.asintServiceWorker = oRegistration.installing || oRegistration.waiting || oRegistration.active;
+                        console.log("Service Worker has registered");
+                    }).catch(function(oError) {
+                        console.log("Service Worker registration failed: ", oError);
+                    });
+
+                    // Checking for Service Worker registration
+                    if (navigator.serviceWorker.controller) {
+                        console.log("Has Service Worker registered");
+                    }
+
+                    // Attaching event listener for Service Worker controller change
+                    addEventListener("controllerchange", function (oEvent) {
+                        console.log("New version of Service Worker installed and activated");
+                    });
+
+                } else {
+
+                    console.log("Sorry, Service workers are not supported. Please try different browsers");
+
+                }
             }
         });
     }
